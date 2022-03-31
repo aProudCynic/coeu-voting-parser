@@ -12,15 +12,20 @@ VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS = {
     "countryCodeNotParticipatingGrouped": "0",
 }
 
-if __name__ == "__main__":
 
+def fetch_votings():
     response = requests.post("https://data.consilium.europa.eu/sparql", data={
         "query": SPARQL_QUERY_FOR_ALL_VOTE_RESULTS,
         "format": "application/sparql-results+json",
         "timeout": "0"
 
     })
-    votings = response.json()['results']['bindings']
+    return response.json()['results']['bindings']
+
+
+if __name__ == "__main__":
+
+    votings = fetch_votings()
 
     votes_by_member_states = pd.DataFrame(
         columns=[
@@ -39,4 +44,3 @@ if __name__ == "__main__":
                     row_data[member_state] = vote_value
         votes_by_member_states = votes_by_member_states.append(row_data, ignore_index=True)
     print(votes_by_member_states)
-
