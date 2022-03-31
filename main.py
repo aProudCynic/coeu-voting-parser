@@ -23,10 +23,7 @@ def fetch_votings():
     return response.json()['results']['bindings']
 
 
-if __name__ == "__main__":
-
-    votings = fetch_votings()
-
+def transform_to_votes_by_member_states(votings):
     votes_by_member_states = pd.DataFrame(
         columns=[
             'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HU', 'IE', 'IT', 'LT', 'LU',
@@ -43,4 +40,13 @@ if __name__ == "__main__":
                 if member_state != '':
                     row_data[member_state] = vote_value
         votes_by_member_states = votes_by_member_states.append(row_data, ignore_index=True)
+    return votes_by_member_states
+
+
+if __name__ == "__main__":
+
+    votings = fetch_votings()
+
+    votes_by_member_states = transform_to_votes_by_member_states(votings)
+
     print(votes_by_member_states)
