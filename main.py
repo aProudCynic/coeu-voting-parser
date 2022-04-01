@@ -47,5 +47,28 @@ if __name__ == "__main__":
     votings = fetch_votings()
 
     votes_by_member_states = transform_to_votes_by_member_states(votings)
+    votes_by_member_states.to_csv('votes_by_member_states.csv')
 
-    print(votes_by_member_states)
+    votings_together = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
+    same_votes = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
+
+    for index, row in votes_by_member_states.iterrows():
+        for member_state_1 in ALL_MEMBER_STATE_CODES:
+            for member_state_2 in ALL_MEMBER_STATE_CODES:
+                if member_state_1 != member_state_2 and row[member_state_1] != '0' and row[member_state_2] != '0':
+                    votings_together[member_state_1][member_state_2] = \
+                        votings_together[member_state_1][member_state_2] + 1
+                    if row[member_state_1] == row[member_state_2]:
+                        same_votes[member_state_1][member_state_2] = same_votes[member_state_1][member_state_2] + 1
+        print(f'{index}')
+    votings_together.to_csv('votings_together.csv')
+    same_votes.to_csv('same_votes.csv')
+
+    same_vote_percentages = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES)
+    for member_state_1 in ALL_MEMBER_STATE_CODES:
+        for member_state_2 in ALL_MEMBER_STATE_CODES:
+            if member_state_1 != member_state_2:
+                same_vote_percentages[member_state_1][member_state_2] = \
+                    same_votes[member_state_1][member_state_2] / votings_together[member_state_1][member_state_2] * 100
+    same_vote_percentages.to_csv('same_vote_percentages.csv')
+    print(same_vote_percentages)
