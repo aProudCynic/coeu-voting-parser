@@ -19,8 +19,8 @@ VOTE_CAST = [VOTE_CODE_YES, VOTE_CODE_NO, VOTE_CODE_ABSTAIN]
 
 
 ALL_MEMBER_STATE_CODES = [
-    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT',
-    'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'UK'
+    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV',
+    'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'UK'
 ]
 
 
