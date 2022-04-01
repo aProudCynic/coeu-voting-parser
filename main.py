@@ -11,6 +11,10 @@ VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS = {
     "countryCodeAbstainedGrouped": "A",
     "countryCodeNotParticipatingGrouped": "0",
 }
+ALL_MEMBER_STATE_CODES = [
+    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT',
+    'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'UK'
+]
 
 
 def fetch_votings():
@@ -24,12 +28,7 @@ def fetch_votings():
 
 
 def transform_to_votes_by_member_states(votings):
-    votes_by_member_states = pd.DataFrame(
-        columns=[
-            'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HU', 'IE', 'IT', 'LT', 'LU',
-            'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'UK'
-        ]
-    )
+    votes_by_member_states = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES)
     for voting in votings:
         row_data = {}
         for vote_key in VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS.keys():
