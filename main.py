@@ -15,6 +15,9 @@ VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS = {
     "countryCodeAbstainedGrouped": VOTE_CODE_ABSTAIN,
     "countryCodeNotParticipatingGrouped": VOTE_CODE_NOT_PARTICIPATED,
 }
+VOTE_CAST = [VOTE_CODE_YES, VOTE_CODE_NO, VOTE_CODE_ABSTAIN]
+
+
 ALL_MEMBER_STATE_CODES = [
     'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT',
     'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK', 'UK'
@@ -59,7 +62,8 @@ if __name__ == "__main__":
     for index, row in votes_by_member_states.iterrows():
         for member_state_1 in ALL_MEMBER_STATE_CODES:
             for member_state_2 in ALL_MEMBER_STATE_CODES:
-                if member_state_1 != member_state_2 and row[member_state_1] != '0' and row[member_state_2] != '0':
+                if member_state_1 != member_state_2 and row[member_state_1] in VOTE_CAST \
+                        and row[member_state_2] in VOTE_CAST:
                     votings_together[member_state_1][member_state_2] = \
                         votings_together[member_state_1][member_state_2] + 1
                     if row[member_state_1] == row[member_state_2]:
