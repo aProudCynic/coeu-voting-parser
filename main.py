@@ -18,6 +18,7 @@ VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS = {
 }
 VOTE_CAST = [VOTE_CODE_YES, VOTE_CODE_NO, VOTE_CODE_ABSTAIN]
 
+VOTES_BY_MEMBER_STATES_FILENAME = 'votes_by_member_states.csv'
 
 ALL_MEMBER_STATE_CODES = [
     'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV',
@@ -51,14 +52,13 @@ def transform_to_votes_by_member_states(votings):
 
 
 def get_votes_by_member_states():
-    votes_by_member_states_filename = 'votes_by_member_states.csv'
-    if exists(votes_by_member_states_filename):
+    if exists(VOTES_BY_MEMBER_STATES_FILENAME):
         votings = fetch_votings()
         votes_by_member_states = transform_to_votes_by_member_states(votings)
-        votes_by_member_states.to_csv('votes_by_member_states.csv')
+        votes_by_member_states.to_csv(VOTES_BY_MEMBER_STATES_FILENAME)
         return votes_by_member_states
     else:
-        return pd.read_csv('votes_by_member_states.csv')
+        return pd.read_csv(VOTES_BY_MEMBER_STATES_FILENAME)
 
 
 if __name__ == "__main__":
