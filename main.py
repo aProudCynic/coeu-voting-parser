@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+from os.path import exists
 
 # copied from query at:
 # https://www.consilium.europa.eu/en/general-secretariat/corporate-policies/transparency/open-data/voting-results/
@@ -49,12 +50,20 @@ def transform_to_votes_by_member_states(votings):
     return votes_by_member_states
 
 
+def get_votes_by_member_states():
+    votes_by_member_states_filename = 'votes_by_member_states.csv'
+    if exists(votes_by_member_states_filename):
+        votings = fetch_votings()
+        votes_by_member_states = transform_to_votes_by_member_states(votings)
+        votes_by_member_states.to_csv('votes_by_member_states.csv')
+        return votes_by_member_states
+    else:
+        return pd.read_csv('votes_by_member_states.csv')
+
+
 if __name__ == "__main__":
 
-    votings = fetch_votings()
-
-    votes_by_member_states = transform_to_votes_by_member_states(votings)
-    votes_by_member_states.to_csv('votes_by_member_states.csv')
+    votes_by_member_states = get_votes_by_member_states()
 
     votings_together = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
     same_votes = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
