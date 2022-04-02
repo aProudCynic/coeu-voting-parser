@@ -20,6 +20,8 @@ VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS = {
 VOTE_CAST = [VOTE_CODE_YES, VOTE_CODE_NO, VOTE_CODE_ABSTAIN]
 
 VOTES_BY_MEMBER_STATES_FILENAME = 'votes_by_member_states.csv'
+SAME_VOTINGS_PARTICIPATED_FILENAME = 'votings_together.csv'
+SAME_VOTES_CAST_FILENAME = 'same_votes.csv'
 
 ALL_MEMBER_STATE_CODES = [
     'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV',
@@ -62,25 +64,32 @@ def get_votes_by_member_states():
         return pd.read_csv(VOTES_BY_MEMBER_STATES_FILENAME)
 
 
+def get_processed_vote_data(votes_by_member_states):
+    if exists(SAME_VOTINGS_PARTICIPATED_FILENAME) and exists(SAME_VOTES_CAST_FILENAME):
+        return pd.read_csv(SAME_VOTINGS_PARTICIPATED_FILENAME), pd.read_csv(SAME_VOTES_CAST_FILENAME),
+    else:
+        votings_together = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
+        same_votes = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
+        for index, row in votes_by_member_states.iterrows():
+            for member_state_1 in ALL_MEMBER_STATE_CODES:
+                for member_state_2 in ALL_MEMBER_STATE_CODES:
+                    if member_state_1 != member_state_2 and row[member_state_1] in VOTE_CAST \
+                            and row[member_state_2] in VOTE_CAST:
+                        votings_together[member_state_1][member_state_2] = \
+                            votings_together[member_state_1][member_state_2] + 1
+                        if row[member_state_1] == row[member_state_2]:
+                            same_votes[member_state_1][member_state_2] = same_votes[member_state_1][member_state_2] + 1
+            print(f'{index}')
+        votings_together.to_csv(SAME_VOTINGS_PARTICIPATED_FILENAME)
+        same_votes.to_csv(SAME_VOTES_CAST_FILENAME)
+        return votings_together, same_votes
+
+
 if __name__ == "__main__":
 
     votes_by_member_states = get_votes_by_member_states()
 
-    votings_together = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
-    same_votes = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
-
-    for index, row in votes_by_member_states.iterrows():
-        for member_state_1 in ALL_MEMBER_STATE_CODES:
-            for member_state_2 in ALL_MEMBER_STATE_CODES:
-                if member_state_1 != member_state_2 and row[member_state_1] in VOTE_CAST \
-                        and row[member_state_2] in VOTE_CAST:
-                    votings_together[member_state_1][member_state_2] = \
-                        votings_together[member_state_1][member_state_2] + 1
-                    if row[member_state_1] == row[member_state_2]:
-                        same_votes[member_state_1][member_state_2] = same_votes[member_state_1][member_state_2] + 1
-        print(f'{index}')
-    votings_together.to_csv('votings_together.csv')
-    same_votes.to_csv('same_votes.csv')
+    votings_together, same_votes = get_processed_vote_data(votes_by_member_states)
 
     same_vote_percentages = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES)
     for member_state_1 in ALL_MEMBER_STATE_CODES:
