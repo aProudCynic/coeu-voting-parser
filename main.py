@@ -55,14 +55,13 @@ def transform_to_votes_by_member_states(votings):
     return votes_by_member_states
 
 
-def get_votes_by_member_states():
-    if exists(VOTES_BY_MEMBER_STATES_FILENAME):
-        votings = fetch_votings()
-        votes_by_member_states = transform_to_votes_by_member_states(votings)
-        votes_by_member_states.to_csv(VOTES_BY_MEMBER_STATES_FILENAME)
-        return votes_by_member_states
+def get_cacheable_data(filename, data_extractor_function, *parameters):
+    if exists(filename):
+        return pd.read_csv(filename)
     else:
-        return pd.read_csv(VOTES_BY_MEMBER_STATES_FILENAME)
+        data = data_extractor_function(*parameters)
+        data.to_csv(filename)
+        return data
 
 
 def get_processed_vote_data(votes_by_member_states):
@@ -86,24 +85,33 @@ def get_processed_vote_data(votes_by_member_states):
         return votings_together, same_votes
 
 
-def get_same_vote_percentages_matrix():
-    if exists(SAME_VOTE_PERCENTAGES_FILENAME):
-        return pd.read_csv(SAME_VOTE_PERCENTAGES_FILENAME)
-    else:
-        same_vote_percentages = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES)
-        for member_state_1 in ALL_MEMBER_STATE_CODES:
-            for member_state_2 in ALL_MEMBER_STATE_CODES:
-                if member_state_1 != member_state_2:
-                    same_vote_percentages[member_state_1][member_state_2] = \
-                        same_votes[member_state_1][member_state_2] / votings_together[member_state_1][member_state_2] * 100
-        same_vote_percentages.to_csv(SAME_VOTE_PERCENTAGES_FILENAME)
-        return same_vote_percentages
+def calculate_same_vote_percentages_matrix(votings_together, same_votes):
+    same_vote_percentages = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES)
+    for member_state_1 in ALL_MEMBER_STATE_CODES:
+        for member_state_2 in ALL_MEMBER_STATE_CODES:
+            if member_state_1 != member_state_2:
+                same_vote_percentages[member_state_1][member_state_2] = \
+                    same_votes[member_state_1][member_state_2] / votings_together[member_state_1][member_state_2] * 100
+    return same_vote_percentages
 
 
 if __name__ == "__main__":
 
-    votes_by_member_states = get_votes_by_member_states()
+    votings = fetch_votings()
+
+    votes_by_member_states = get_cacheable_data(
+        VOTES_BY_MEMBER_STATES_FILENAME,
+        transform_to_votes_by_member_states,
+        votings,
+    )
 
     votings_together, same_votes = get_processed_vote_data(votes_by_member_states)
 
-    same_vote_percentages = get_same_vote_percentages_matrix()
+    same_vote_percentages = get_cacheable_data(
+        SAME_VOTE_PERCENTAGES_FILENAME,
+        calculate_same_vote_percentages_matrix,
+        votings_together,
+        same_votes,
+    )
+
+    print(same_vote_percentages)
