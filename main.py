@@ -79,7 +79,6 @@ def get_processed_vote_data(votes_by_member_states):
                             votings_together[member_state_1][member_state_2] + 1
                         if row[member_state_1] == row[member_state_2]:
                             same_votes[member_state_1][member_state_2] = same_votes[member_state_1][member_state_2] + 1
-            print(f'{index}')
         votings_together.to_csv(SAME_VOTINGS_PARTICIPATED_FILENAME)
         same_votes.to_csv(SAME_VOTES_CAST_FILENAME)
         return votings_together, same_votes
