@@ -40,7 +40,7 @@ def fetch_votings():
     return response.json()['results']['bindings']
 
 
-def transform_to_votes_by_member_states(votings):
+def calculate_votes_by_member_states(votings):
     votes_by_member_states = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES)
     for voting in votings:
         row_data = {}
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     votes_by_member_states = get_cacheable_data(
         VOTES_BY_MEMBER_STATES_FILENAME,
-        transform_to_votes_by_member_states,
+        calculate_votes_by_member_states,
         votings,
     )
 
