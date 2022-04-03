@@ -22,6 +22,7 @@ VOTE_CAST = [VOTE_CODE_YES, VOTE_CODE_NO, VOTE_CODE_ABSTAIN]
 VOTES_BY_MEMBER_STATES_FILENAME = 'votes_by_member_states.csv'
 SAME_VOTINGS_PARTICIPATED_FILENAME = 'votings_together.csv'
 SAME_VOTES_CAST_FILENAME = 'same_votes.csv'
+SAME_VOTE_PERCENTAGES_FILENAME = 'same_vote_percentages.csv'
 
 ALL_MEMBER_STATE_CODES = [
     'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV',
@@ -85,17 +86,24 @@ def get_processed_vote_data(votes_by_member_states):
         return votings_together, same_votes
 
 
+def get_same_vote_percentages_matrix():
+    if exists(SAME_VOTE_PERCENTAGES_FILENAME):
+        return pd.read_csv(SAME_VOTE_PERCENTAGES_FILENAME)
+    else:
+        same_vote_percentages = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES)
+        for member_state_1 in ALL_MEMBER_STATE_CODES:
+            for member_state_2 in ALL_MEMBER_STATE_CODES:
+                if member_state_1 != member_state_2:
+                    same_vote_percentages[member_state_1][member_state_2] = \
+                        same_votes[member_state_1][member_state_2] / votings_together[member_state_1][member_state_2] * 100
+        same_vote_percentages.to_csv(SAME_VOTE_PERCENTAGES_FILENAME)
+        return same_vote_percentages
+
+
 if __name__ == "__main__":
 
     votes_by_member_states = get_votes_by_member_states()
 
     votings_together, same_votes = get_processed_vote_data(votes_by_member_states)
 
-    same_vote_percentages = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES)
-    for member_state_1 in ALL_MEMBER_STATE_CODES:
-        for member_state_2 in ALL_MEMBER_STATE_CODES:
-            if member_state_1 != member_state_2:
-                same_vote_percentages[member_state_1][member_state_2] = \
-                    same_votes[member_state_1][member_state_2] / votings_together[member_state_1][member_state_2] * 100
-    same_vote_percentages.to_csv('same_vote_percentages.csv')
-    print(same_vote_percentages)
+    same_vote_percentages = get_same_vote_percentages_matrix()
