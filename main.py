@@ -64,6 +64,7 @@ def get_cacheable_data(filename, data_extractor_function, *parameters):
         return data
 
 
+# TODO consider decoupling loop, transform to get_cacheable_data (will hit performance)
 def get_processed_vote_data(votes_by_member_states):
     if exists(SAME_VOTINGS_PARTICIPATED_FILENAME) and exists(SAME_VOTES_CAST_FILENAME):
         return pd.read_csv(SAME_VOTINGS_PARTICIPATED_FILENAME), pd.read_csv(SAME_VOTES_CAST_FILENAME),
