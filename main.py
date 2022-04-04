@@ -31,9 +31,9 @@ ALL_MEMBER_STATE_CODES = [
 ]
 
 
-def fetch_votings():
+def fetch_query_results(query):
     response = requests.post("https://data.consilium.europa.eu/sparql", data={
-        "query": SPARQL_QUERY_FOR_ALL_VOTE_RESULTS,
+        "query": query,
         "format": "application/sparql-results+json",
         "timeout": "0"
 
@@ -129,12 +129,12 @@ def calculate_group_vote_data(votes_by_member_states):
 
 if __name__ == "__main__":
 
-    votings = fetch_votings()
+    voting_results = fetch_query_results(SPARQL_QUERY_FOR_ALL_VOTE_RESULTS)
 
     votes_by_member_states = get_cacheable_data(
         VOTES_BY_MEMBER_STATES_FILENAME,
         calculate_votes_by_member_states,
-        votings,
+        voting_results,
     )
 
     votings_together, same_votes = get_processed_vote_data(votes_by_member_states)
