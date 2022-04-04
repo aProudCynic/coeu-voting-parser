@@ -23,6 +23,7 @@ VOTES_BY_MEMBER_STATES_FILENAME = 'votes_by_member_states.csv'
 SAME_VOTINGS_PARTICIPATED_FILENAME = 'votings_together.csv'
 SAME_VOTES_CAST_FILENAME = 'same_votes.csv'
 SAME_VOTE_PERCENTAGES_FILENAME = 'same_vote_percentages.csv'
+GROUP_VOTE_DATA_FILENAME = 'group_vote_data.csv'
 
 ALL_MEMBER_STATE_CODES = [
     'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV',
@@ -95,6 +96,37 @@ def calculate_same_vote_percentages_matrix(votings_together, same_votes):
     return same_vote_percentages
 
 
+def calculate_group_vote_data(votes_by_member_states):
+    groups = [
+        ('V4', ['SK', 'PL', 'HU', 'CZ']),
+        ('Benelux', ['BE', 'NL', 'LU']),
+        ('Baltic', ['EE', 'LT', 'LV']),
+        ('Nordic', ['DK', 'SE', 'FI']),
+        ('E3', ['DE', 'FR', 'UK']),
+        ('Nordic-Baltic Six', ['EE', 'LT', 'LV', 'DK', 'SE', 'FI']),
+        ('Weimar Triangle', ['DE', 'FR', 'PL']),
+    ]
+    group_names = [group[0] for group in groups]
+    group_vote_data = pd.DataFrame(
+        columns=['votings_participated_together', 'same_vote', 'same_vote_percentage'],
+        index=group_names,
+        data=0
+    )
+    for _, row in votes_by_member_states.iterrows():
+        for group_name, members in groups:
+            group_member_votes = [row[member] for member in members]
+            if set(group_member_votes).issubset(VOTE_CAST):
+                group_vote_data['votings_participated_together'][group_name] = \
+                    group_vote_data['votings_participated_together'][group_name] + 1.0
+                if all(group_member_vote == group_member_votes[0] for group_member_vote in group_member_votes):
+                    group_vote_data['same_vote'][group_name] = group_vote_data['same_vote'][group_name] + 1.0
+    for group_name in group_names:
+        group_vote_data['same_vote_percentage'][group_name] = \
+            group_vote_data['same_vote'][group_name] / \
+            group_vote_data['votings_participated_together'][group_name] * 100
+    return group_vote_data
+
+
 if __name__ == "__main__":
 
     votings = fetch_votings()
@@ -112,6 +144,12 @@ if __name__ == "__main__":
         calculate_same_vote_percentages_matrix,
         votings_together,
         same_votes,
+    )
+
+    get_cacheable_data(
+        GROUP_VOTE_DATA_FILENAME,
+        calculate_group_vote_data,
+        votes_by_member_states,
     )
 
     print(same_vote_percentages)
