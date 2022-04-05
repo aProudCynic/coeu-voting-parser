@@ -57,18 +57,21 @@ def calculate_votes_by_member_states(votings):
 
 
 def get_cacheable_data(filename, data_extractor_function, *parameters):
-    if exists(filename):
-        return pd.read_csv(filename)
+    file_path = f'csv/{filename}'
+    if exists(file_path):
+        return pd.read_csv(file_path)
     else:
         data = data_extractor_function(*parameters)
-        data.to_csv(filename)
+        data.to_csv(file_path)
         return data
 
 
 # TODO consider decoupling loop, transform to get_cacheable_data (will hit performance)
 def get_processed_vote_data(votes_by_member_states):
-    if exists(SAME_VOTINGS_PARTICIPATED_FILENAME) and exists(SAME_VOTES_CAST_FILENAME):
-        return pd.read_csv(SAME_VOTINGS_PARTICIPATED_FILENAME), pd.read_csv(SAME_VOTES_CAST_FILENAME),
+    same_votings_participated_path = f'csv/{SAME_VOTINGS_PARTICIPATED_FILENAME}'
+    same_votes_cast_path = f'csv/{SAME_VOTES_CAST_FILENAME}'
+    if exists(same_votings_participated_path) and exists(same_votes_cast_path):
+        return pd.read_csv(same_votings_participated_path), pd.read_csv(same_votes_cast_path),
     else:
         votings_together = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
         same_votes = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES, index=ALL_MEMBER_STATE_CODES, data=0)
@@ -81,8 +84,8 @@ def get_processed_vote_data(votes_by_member_states):
                             votings_together[member_state_1][member_state_2] + 1
                         if row[member_state_1] == row[member_state_2]:
                             same_votes[member_state_1][member_state_2] = same_votes[member_state_1][member_state_2] + 1
-        votings_together.to_csv(SAME_VOTINGS_PARTICIPATED_FILENAME)
-        same_votes.to_csv(SAME_VOTES_CAST_FILENAME)
+        votings_together.to_csv(same_votings_participated_path)
+        same_votes.to_csv(same_votes_cast_path)
         return votings_together, same_votes
 
 

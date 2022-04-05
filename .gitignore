@@ -1,4 +1,4 @@
 virtualenv
 .idea
 .tmp
-*.csv
+csv
