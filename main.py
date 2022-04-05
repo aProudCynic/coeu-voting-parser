@@ -44,7 +44,7 @@ def fetch_query_results(query):
 def calculate_votes_by_member_states(votings):
     votes_by_member_states = pd.DataFrame(columns=ALL_MEMBER_STATE_CODES)
     for voting in votings:
-        row_data = {}
+        row_data = {'date': voting['decisionDate']}
         for vote_key in VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS.keys():
             vote_value = VOTE_VALUES_BY_ALL_VOTE_RESULTS_KEYS[vote_key]
             voting_countries_unparsed = voting[vote_key]["value"]
@@ -52,7 +52,7 @@ def calculate_votes_by_member_states(votings):
             for member_state in voting_member_states:
                 if member_state != '':
                     row_data[member_state] = vote_value
-        votes_by_member_states = votes_by_member_states.append(row_data, ignore_index=True)
+        votes_by_member_states = votes_by_member_states.concat(row_data, ignore_index=True)
     return votes_by_member_states
 
 
