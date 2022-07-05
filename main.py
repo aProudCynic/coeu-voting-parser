@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests
 import pandas as pd
 from os.path import exists
@@ -130,6 +132,40 @@ def calculate_group_vote_data(votes_by_member_states):
     return group_vote_data
 
 
+def calculate_before_after(votes_by_member_states, dividing_date):
+    member_state_pairings_with_date = [
+        (['SK', 'HU'], '2020-02-29', 'HU-SK - SMER'),
+        (['CZ', 'HU'], '2021-10-09', 'HU-CZ - Babis'),
+    ]
+    group_names = [
+        member_state_pairing[2] for member_state_pairing in member_state_pairings_with_date
+    ]
+    group_vote_data_before = pd.DataFrame(
+        columns=['votings_participated_together', 'same_vote', 'same_vote_percentage'],
+        index=group_names,
+        data=0
+    )
+    group_vote_data_after = pd.DataFrame(
+        columns=['votings_participated_together', 'same_vote', 'same_vote_percentage'],
+        index=group_names,
+        data=0
+    )
+    for _, row in votes_by_member_states.iterrows():
+        for member_state_pairing, date, group_name in member_state_pairings_with_date:
+            if row[member_state_pairing[0]] in VOTE_CAST and row[member_state_pairing[1]] in VOTE_CAST:
+                vote_date = datetime.strptime(row['date'], '%Y-%m-%d')
+                data_to_add = group_vote_data_before if vote_date < dividing_date else group_vote_data_after
+                data_to_add['votings_participated_together'][group_name] = \
+                    data_to_add['votings_participated_together'][group_name] + 1.0
+                if row[member_state_pairing[0]] == row[member_state_pairing[0]]:
+                    data_to_add['same_vote'][group_name] = data_to_add['same_vote'][group_name] + 1.0
+    for member_states in member_state_pairings_with_date:
+        member_states['same_vote_percentage'][group_name] = \
+            member_states['same_vote'][group_name] / \
+            member_states['votings_participated_together'][group_name] * 100
+    return member_states
+
+
 def merge_voting_data(votings, voting_results):
     enriched_voting_data = []
     for voting_result in voting_results:
@@ -171,6 +207,13 @@ if __name__ == "__main__":
         GROUP_VOTE_DATA_FILENAME,
         calculate_group_vote_data,
         votes_by_member_states,
+    )
+
+    get_cacheable_data(
+        'test.csv',
+        calculate_before_after,
+        votes_by_member_states,
+        datetime.strptime('2020-02-29', '%Y-%m-%d')
     )
 
     print(same_vote_percentages)
